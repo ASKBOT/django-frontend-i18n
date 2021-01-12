@@ -21,7 +21,7 @@ def get_route(app_name, path):
         raise ValueError(f'{path} is not a route in the {app_name}')
 
     rel_path = path.replace(routes_dir, '', 1).strip(os.path.sep)
-    bits = list(os.path.split(rel_path))
+    bits = rel_path.split(os.path.sep) #list(os.path.split(rel_path)) <- does not work for one word paths
     last_bit = bits.pop()
     route = ''
     for bit in bits:
@@ -38,6 +38,8 @@ def get_route(app_name, path):
         return route + f'/:{match.group(1)}'
 
     if last_bit == 'index.svelte':
+        if route == '':
+            return '/'
         return route
 
     return route + '/' + last_bit.replace('.svelte', '')

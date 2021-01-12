@@ -7,6 +7,7 @@ from babel.messages.catalog import Catalog, Message
 from babel.messages.extract import extract_from_file
 from babel.messages.pofile import write_po
 from svelte_i18n import routify
+from svelte_i18n.const import ROUTE_COMMENT_PREFIX
 from svelte_i18n.utils import is_route, get_route, get_app_file_path
 
 class Extractor:
@@ -229,7 +230,7 @@ class Extractor:
         msg.locations.append((app_file_path, line_no))
         for comment in translator_comments:
             msg.user_comments.append(self.format_translator_comment(comment, app_file_path))
-        msg.auto_comments.append(f'route: {route}')
+        msg.auto_comments.append(f'{ROUTE_COMMENT_PREFIX}{route}')
         self.catalog[msg_id] = msg
 
 

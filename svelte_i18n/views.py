@@ -44,6 +44,7 @@ class JSONCatalog(JavaScriptCatalog):
         if package in config:
             if page in config[package]:
                 locale_path = config[package][page]
+                #...get compiled per-route locale path
                 locale = get_language()
                 self.translation = DjangoTranslation(locale,
                                                      domain=page,
