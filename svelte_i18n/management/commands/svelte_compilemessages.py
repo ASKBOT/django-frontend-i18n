@@ -13,5 +13,4 @@ class Command(BaseCommand):
         # for each language in the source locale directory
         for app_name in django_settings.SVELTE_I18N:
             compiler = Compiler(app_name)
-            compiler.compile_per_route_pofiles()
-            compiler.write_per_route_mofiles()
+            compiler.compile_messages()

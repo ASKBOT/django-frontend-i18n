@@ -10,9 +10,40 @@ For example, if the original directory is:
 Do not edit files in the _compiled directory.
 """
 import os
+from collections import defaultdict
 from django.conf import settings as django_settings
-from babel.messages.pofile import read_po
+from babel.messages.mofile import write_mo
+from babel.messages.pofile import read_po, write_po
+from babel.messages.catalog import Catalog
 from svelte_i18n.const import ROUTE_COMMENT_PREFIX
+from svelte_i18n.utils import get_compiled_catalog_path
+
+class LangRouteCatalogs:
+    """Factory class returning per-route catalog for a given language"""
+    def __init__(self):
+        self.route_catalogs = dict()
+
+
+    def __getitem__(self, lang):
+        """Emulates the dict['key'] access"""
+        if lang not in self.route_catalogs:
+            self.route_catalogs[lang] = defaultdict(self.get_catalog_factory(lang))
+        return self.route_catalogs[lang]
+
+
+    def items(self):
+        """Emulates dict().items()"""
+        return self.route_catalogs.items()
+
+
+    @classmethod
+    def get_catalog_factory(cls, lang):
+        """Returns a factory method that creates
+        a babel Catalog for a given language"""
+        def catalog_factory():
+            return Catalog(locale=lang)
+        return catalog_factory
+
 
 class Compiler:
     """Creates the per-route message .po and .mo files.
@@ -23,7 +54,7 @@ class Compiler:
         self.app_name = app_name
         self.config = django_settings.SVELTE_I18N[app_name]
         # nested dicts, first key - lang, second key - route
-        self.per_route_catalogs = dict()
+        self.lang_route_catalogs = LangRouteCatalogs()
 
 
     def compile_messages(self):
@@ -35,24 +66,22 @@ class Compiler:
                     continue
 
                 for route in self.get_message_routes(message):
-                    cat = self.get_catalog(lang, route)
+                    cat = self.lang_route_catalogs[lang][route]
                     cat[message.id] = message
 
-        self.write_pofiles()
-        self.write_mofiles()
+        self.write_catalogs()
 
-    def write_mofiles(self): #pylint: disable=missing-docstring
-        pass
-
-
-    def write_pofiles(self): #pylint: disable=missing-docstring
-        pass
-
-
-    def get_catalog(self, lang, route):
-        """Returns a catalog for a given language and the route.
-        If catalog is missing, create it.
-        """
+    def write_catalogs(self): #pylint: disable=missing-docstring
+        """Writes .po and .mo files for the
+        per language per route catalogs"""
+        for lang, route_catalogs in self.lang_route_catalogs.items():
+            for route, catalog in route_catalogs.items():
+                pofile_path = get_compiled_catalog_path(self.app_name, lang, route, '.po')
+                dirname = os.path.dirname(pofile_path)
+                os.makedirs(dirname, exist_ok=True)
+                write_po(open(pofile_path, 'wb'), catalog)
+                mofile_path = pofile_path[:-3] + '.mo'
+                write_mo(open(mofile_path, 'wb'), catalog)
 
 
     def get_per_language_pofile_paths(self):
@@ -71,7 +100,8 @@ class Compiler:
                     yield lang, pofile_path
 
 
-    def get_message_routes(self, message):
+    @classmethod
+    def get_message_routes(cls, message):
         """Returns routes where `message` appears"""
         routes = list()
         prefix_len = len(ROUTE_COMMENT_PREFIX)

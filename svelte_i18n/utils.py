@@ -12,6 +12,27 @@ def get_app_file_path(app_name, path):
         return path[len(app_dir):]
     raise ValueError(f'File {path} is not part of the {app_name}')
 
+
+def get_compiled_locale_dir(app_name):
+    """Returns path where the compiled locale must be"""
+    conf = django_settings.SVELTE_I18N[app_name]
+    return conf['locale_dir'] + '_compiled'
+
+
+def get_compiled_catalog_path(app_name, lang, route, extension):
+    """Returns path to the apps per language per route catalog
+    with the requested file extension"""
+    dir_path = get_compiled_locale_dir(app_name)
+    route_slug = get_route_slug(route)
+    return os.path.join(dir_path, lang, 'LC_MESSAGES', route_slug) + extension
+
+
+def get_route_slug(route):
+    """Returns slugified route, replacing forward slashes
+    with double underscores"""
+    return route.replace('/', '__')
+
+
 def get_route(app_name, path):
     """Returns route for a given app and path to the file, e.g.:
     /path/to/app/src/pages/[slug]/items/[itemId].svelte -> /:slug/items/:itemId
@@ -21,7 +42,8 @@ def get_route(app_name, path):
         raise ValueError(f'{path} is not a route in the {app_name}')
 
     rel_path = path.replace(routes_dir, '', 1).strip(os.path.sep)
-    bits = rel_path.split(os.path.sep) #list(os.path.split(rel_path)) <- does not work for one word paths
+    #list(os.path.split(rel_path)) <- does not work for one word paths
+    bits = rel_path.split(os.path.sep)
     last_bit = bits.pop()
     route = ''
     for bit in bits:
