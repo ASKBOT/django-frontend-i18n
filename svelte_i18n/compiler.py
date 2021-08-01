@@ -81,6 +81,7 @@ class Compiler:
                 os.makedirs(dirname, exist_ok=True)
                 write_po(open(pofile_path, 'wb'), catalog)
                 mofile_path = pofile_path[:-3] + '.mo'
+                mofile_obj = open(mofile_path, 'wb')
                 write_mo(open(mofile_path, 'wb'), catalog)
 
 

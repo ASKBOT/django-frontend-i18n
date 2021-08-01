@@ -1,6 +1,8 @@
 Django i18n localization for Svelte apps
 ========================================
 
+This app is experimental.
+
 Contains:
 
 * View `JSONCatalog` serving the translation strings to the frontend

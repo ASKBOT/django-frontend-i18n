@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings as django_settings
 from babel.messages.catalog import Catalog, Message
 from babel.messages.extract import extract_from_file
-from babel.messages.pofile import write_po
+from babel.messages.pofile import read_po, write_po
 from svelte_i18n import routify
 from svelte_i18n.const import ROUTE_COMMENT_PREFIX
 from svelte_i18n.utils import is_route, get_route, get_app_file_path
@@ -22,7 +22,7 @@ class Extractor:
     def __init__(self, app_name):
         self.app_name = app_name
         self.config = django_settings.SVELTE_I18N[self.app_name]
-        self.catalog = Catalog(locale=django_settings.LANGUAGE_CODE)
+        self.catalog = self.read_pofile()
 
     def extract_messages(self):
         """Extracts messages for the app"""
@@ -46,14 +46,23 @@ class Extractor:
                 self.process_route(path, route)
 
 
+    def read_pofile(self):
+        """Reads pofile and returns the catalog"""
+        with self.open_pofile('rb') as po_file:
+            return read_po(po_file)
+
+
     def write_pofile(self):
         """Writes catalog of the app to the pofile"""
-        with self.open_pofile() as po_file:
+        with self.open_pofile('wb') as po_file:
             write_po(po_file, self.catalog)
 
 
-    def open_pofile(self):
-        """Returns writeable file object at the source language
+    def open_pofile(self, mode):
+        """
+        `mode` - is the file open mode.
+
+        Returns file object at the source language
         pofile location.
         Insures that all parent directories are created.
         """
@@ -62,7 +71,7 @@ class Extractor:
         src_locale_dir = os.path.join(locale_dir, lang, 'LC_MESSAGES')
         os.makedirs(src_locale_dir, exist_ok=True)
         pofile_path = os.path.join(src_locale_dir, 'svelte.po')
-        return open(pofile_path, 'wb')
+        return open(pofile_path, mode)
 
 
     def process_route(self, path, route):
