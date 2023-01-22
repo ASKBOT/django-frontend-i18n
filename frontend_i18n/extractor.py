@@ -1,9 +1,12 @@
 """Contains the message extractor file"""
 import os
 from django.conf import settings as django_settings
+from django.core.management.commands.makemessages import plural_forms_re
+from babel.core import Locale
 from babel.messages.catalog import Message
 from babel.messages.extract import extract_from_file
 from babel.messages.pofile import read_po, write_po
+from babel.messages.catalog import Catalog
 from frontend_i18n.utils import get_app_file_path
 
 class Extractor:
@@ -19,7 +22,7 @@ class Extractor:
     def __init__(self, app_name):
         self.app_name = app_name
         self.config = django_settings.FRONTEND_I18N[self.app_name]
-        self.catalog = self.read_pofile()
+        self.catalog = self.read_pofile() or Catalog()
 
     def extract_messages(self):
         """Extracts messages for the app"""
@@ -39,9 +42,27 @@ class Extractor:
 
 
     def read_pofile(self):
-        """Reads pofile and returns the catalog"""
-        with self.open_pofile('rb') as po_file:
-            return read_po(po_file)
+        """Reads pofile and returns the catalog,
+        if file does not exist, returns None
+        """
+        try:
+            with self.open_pofile('rb') as po_file:
+                return read_po(po_file, locale=self.get_locale())
+
+        except IOError:
+            return None
+
+
+    def get_locale(self):
+        """Returns Babel `Locale` object for the source language"""
+        return Locale.parse(django_settings.LANGUAGE_CODE)
+
+    def get_plural_forms_header(self, po_file):
+        """Returns string with plural forms header, like in django makemessages command"""
+        for line in po_file:
+            match = plural_forms_re.match(line)
+            if match:
+                return match.group(0)
 
 
     def write_pofile(self):
@@ -63,7 +84,7 @@ class Extractor:
         src_locale_dir = os.path.join(locale_dir, lang, 'LC_MESSAGES')
         os.makedirs(src_locale_dir, exist_ok=True)
         pofile_path = os.path.join(src_locale_dir, f'{self.app_name}.po')
-        return open(pofile_path, mode, encoding='utf-8')
+        return open(pofile_path, mode)
 
 
     def extract_messages_from_file(self, path):

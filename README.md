@@ -15,6 +15,8 @@ then render the translations.
 The endpoint returns all messages for the app at once, this may be unacceptable 
 for very large applications.
 
+Serving per-route catalogs may be in the future plans.
+
 If you have a SSR frontend - you could in the SSR load all messages on startup
 and store them. The frontend would load the landing page and then asynchronously
 load all the strings. This approach could work for relatively large apps.

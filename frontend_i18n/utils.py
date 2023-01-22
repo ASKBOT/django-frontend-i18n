@@ -5,7 +5,7 @@ from django.conf import settings as django_settings
 def get_app_file_path(app_name, path):
     """Returns path relative to the app root"""
     conf = django_settings.FRONTEND_I18N[app_name]
-    app_dir = conf['app_src_dir']
+    app_dir = conf['src_dir']
     if path.startswith(app_dir):
         return path[len(app_dir):]
     raise ValueError(f'File {path} is not part of the {app_name}')
