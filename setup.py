@@ -2,9 +2,9 @@ from distutils.core import setup
 import sys
 
 setup(
-    name="django-svelte-i18n",
+    name="django-frontend-i18n",
     version="0.0.1",
-    description='A Django app for extraction and serving of translation strings for Svelte apps',
+    description='A Django app for extraction and serving of translation strings for frontend apps (written in React, Vue, Svelte, etc.)',
     author='Evgeny.Fadeev',
     author_email='evgeny.fadeev@gmail.com',
     install_requires=['esprima', 'beautifulsoup'],
@@ -15,8 +15,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Svelte',
-        'Framework :: Routify',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
