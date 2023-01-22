@@ -1,7 +1,5 @@
 """Utility functions"""
-import fnmatch
 import os
-import re
 from django.conf import settings as django_settings
 
 def get_app_file_path(app_name, path):
@@ -11,10 +9,6 @@ def get_app_file_path(app_name, path):
     if path.startswith(app_dir):
         return path[len(app_dir):]
     raise ValueError(f'File {path} is not part of the {app_name}')
-
-
-def get_compiled_locale_dir(app_name):
-    """Returns path where the compiled locale must be"""
 
 
 def get_compiled_catalog_path(app_name, lang, extension):

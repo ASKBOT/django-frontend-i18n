@@ -1,7 +1,6 @@
 """This is a copy of Django i18n JSONCatalog view,
 minimally modified to serve the requested
 catalog."""
-import os.path
 from django.conf import settings as django_settings
 from django.http import Http404, JsonResponse
 from django.views.i18n import JavaScriptCatalog

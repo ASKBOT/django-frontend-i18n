@@ -1,9 +1,7 @@
 """Contains the message extractor file"""
 import os
-import esprima
-from bs4 import BeautifulSoup
 from django.conf import settings as django_settings
-from babel.messages.catalog import Catalog, Message
+from babel.messages.catalog import Message
 from babel.messages.extract import extract_from_file
 from babel.messages.pofile import read_po, write_po
 from frontend_i18n.utils import get_app_file_path
@@ -65,7 +63,7 @@ class Extractor:
         src_locale_dir = os.path.join(locale_dir, lang, 'LC_MESSAGES')
         os.makedirs(src_locale_dir, exist_ok=True)
         pofile_path = os.path.join(src_locale_dir, f'{self.app_name}.po')
-        return open(pofile_path, mode)
+        return open(pofile_path, mode, encoding='utf-8')
 
 
     def extract_messages_from_file(self, path):

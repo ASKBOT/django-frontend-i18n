@@ -1,3 +1,4 @@
+"""urlconf for the frontend_i18n app"""
 from django.conf.urls import url
 from frontend_i18n.views import JSONCatalog
 
